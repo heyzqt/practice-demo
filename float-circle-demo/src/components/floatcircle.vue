@@ -61,15 +61,15 @@ export default {
     title: {
       type: String
     },
-    currentTime: {
-      type: String
-    },
     duration: {
       type: String
     },
     isPlay: {
       type: Boolean,
       default: false
+    },
+    audio: {
+      type: HTMLAudioElement
     }
   },
   data() {
@@ -83,21 +83,33 @@ export default {
       showCircleContent: false,
       isAnimated: false,
       playIcon: require("@/assets/icon-sound-white-play.gif"),
-      pauseIcon: require("@/assets/icon-sound-white-pause.png")
+      pauseIcon: require("@/assets/icon-sound-white-pause.png"),
+      currentTime: ""
     };
-  },
-  watch: {
-    isHidden(newVal, oldVal) {
-      if (!newVal && this.circleWidth === 0) {
-        this.initCircle();
-      }
-    }
   },
   mounted() {
     //记录屏幕的宽度和高度
     this.clientWidth = document.documentElement.clientWidth;
     this.clientHeight = document.documentElement.clientHeight;
     this.initCircle();
+  },
+  watch: {
+    isHidden(newVal, oldVal) {
+      if (!newVal && this.circleWidth === 0) {
+        this.initCircle();
+      }
+    },
+    audio: {
+      handler(newVal, oldVal) {
+        if (newVal && newVal.getAttribute("isAddListener") !== "1") {
+          newVal.setAttribute("isAddListener", "1"); //避免重复添加timeupdate的监听事件
+          newVal.addEventListener("timeupdate", () => {
+            this.currentTime = this.formatTime(newVal.currentTime);
+          });
+        }
+      },
+      immediate: true
+    }
   },
   methods: {
     initCircle() {
@@ -212,6 +224,54 @@ export default {
       this.handleHideCircle();
       this.$emit("togglePlayState");
       this.$emit("toggleCircle", true);
+    },
+    formatTime(time) {
+      let result = time + "";
+      let minuate = parseInt(time / 60) + "";
+      if (minuate.length <= 1) {
+        result = this.leftPad(minuate, 2, "0");
+      } else {
+        result = minuate;
+      }
+
+      let second = parseInt(time % 60) + "";
+      if (second.length <= 1) {
+        result = result + ":" + this.leftPad(second, 2, "0");
+      } else {
+        result = result + ":" + second;
+      }
+      return result;
+    },
+    leftPad(str, len, ch) {
+      // convert `str` to a `string`
+      str = str + "";
+      // `len` is the `pad`'s length now
+      len = len - str.length;
+      // doesn't need to pad
+      if (len <= 0) return str;
+      // `ch` defaults to `' '`
+      if (!ch && ch !== 0) ch = " ";
+      // convert `ch` to a `string` cuz it could be a number
+      ch = ch + "";
+      // cache common use cases
+      if (ch === " " && len < 10) return cache[len] + str;
+      // `pad` starts with an empty string
+      var pad = "";
+      // loop
+      while (true) {
+        // add `ch` to `pad` if `len` is odd
+        if (len & 1) pad += ch;
+        // divide `len` by 2, ditch the remainder
+        len >>= 1;
+        // "double" the `ch` so this operation count grows logarithmically on `len`
+        // each time `ch` is "doubled", the `len` would need to be "doubled" too
+        // similar to finding a value in binary search tree, hence O(log(n))
+        if (len) ch += ch;
+        // `len` is 0, exit the loop
+        else break;
+      }
+      // pad `str`!
+      return pad + str;
     }
   }
 };
@@ -221,8 +281,8 @@ export default {
 $extendedWidth: 150px;
 $circleWidth: 46px;
 $circleHeight: 46px;
-$soundWidth: 36px;
-$soundHeight: 36px;
+$soundWidth: 26px;
+$soundHeight: 26px;
 
 .hidden {
   display: none;
@@ -234,8 +294,10 @@ $soundHeight: 36px;
   top: 0;
   right: 0;
   bottom: 0;
-  background-color: pink;
+  background-color: rgba(255, 255, 255, 0.5);
   display: none;
+  backdrop-filter: blur(10px); //毛玻璃效果，ios有效
+  -webkit-backdrop-filter: blur(10px);
 
   &.isOpen {
     display: block;
@@ -250,7 +312,6 @@ $soundHeight: 36px;
   border-radius: 50%;
   background-color: olivedrab;
   overflow: hidden;
-  // background-color: hsla(0,0%,100%,.9);
   -webkit-tap-highlight-color: transparent; //ios长按的高亮灰色设置为透明
   -webkit-touch-callout: none; //ios禁止显示系统默认菜单
   -webkit-user-select: none; //ios控制文本是否默认选中
@@ -293,7 +354,7 @@ $soundHeight: 36px;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      color: #4c4948;
+      color: #fff;
       font-size: 10px;
       .title {
         overflow: hidden;
@@ -301,7 +362,6 @@ $soundHeight: 36px;
         text-overflow: ellipsis;
       }
       .time {
-        color: #7b7b7b;
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;

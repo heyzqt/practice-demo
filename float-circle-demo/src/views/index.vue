@@ -1,18 +1,19 @@
 <template>
   <div class="main">
     <audio id="audio" controls :src="audiourl"></audio>
-    <div @click="showCircle" style="height: 100px; background-color: red;">
-      显示float circle
+    <div class="show-circle" @click="showCircle">
+      显示悬浮球
     </div>
     <float-circle
       title="这是一首我想听的歌曲歌词是什么"
       :isPlay="isPlay"
-      :currentTime="currentTime"
+      :audio="currentAudio"
       :duration="duration"
       :isHidden="isHidden"
       @toggleCircle="toggleCircle"
       @togglePlayState="togglePlayState"
     ></float-circle>
+    <!-- :currentTime="currentTime" 不建议这里传入currentTime，因为Vue响应式更新，data中的currentTime一直在更新，会使这个页面重新渲染，最好把currentTime放在float-circle组件里面更新-->
   </div>
 </template>
 <script>
@@ -21,19 +22,21 @@ export default {
   data() {
     return {
       isHidden: true,
-      currentTime: "",
       duration: "",
       isPlay: false,
-      audiourl:
-        "http://cdnizy.knowgroup.cn/upload/audios/201906/093i4CV1561522122rsc4pOC8.mp3"
+      currentAudio: null,
+      audiourl: require("@/assets/music.mp3")
     };
   },
   mounted() {
     let audio = document.getElementById("audio");
+    this.currentAudio = audio;
     audio.addEventListener("canplay", () => {
+      //初始化音乐播放时间
       this.duration = this.formatTime(audio.duration);
     });
     audio.addEventListener("timeupdate", () => {
+      //更新时间
       this.currentTime = this.formatTime(audio.currentTime);
     });
     audio.addEventListener("playing", () => {
@@ -87,5 +90,10 @@ export default {
   width: 100vw;
   height: 100vh;
   background-color: #fffbf5;
+}
+.show-circle {
+  width: 30vw;
+  height: 20vw;
+  background-color: red;
 }
 </style>
