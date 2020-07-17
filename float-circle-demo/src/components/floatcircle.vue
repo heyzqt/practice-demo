@@ -127,7 +127,7 @@ export default {
       });
     },
     handleHideCircle() {
-      let extendedWidth = 150;
+      let extendedWidth = 150; //与css中的$extendedWidth值保持一致
       if (this.showCircleContent) {
         if (this.$refs.circle.style.left !== "0px") {
           //在屏幕右边
@@ -140,7 +140,7 @@ export default {
       this.showCircleContent = false;
     },
     handleClickCircle() {
-      let extendedWidth = 150;
+      let extendedWidth = 150; //与css中的$extendedWidth值保持一致
       if (!this.showCircleContent) {
         if (this.$refs.circle.style.left === "0px") {
           this.$refs.circle.style.borderRadius = "0 100px 100px 0";
@@ -162,7 +162,7 @@ export default {
       let offsetX = e.targetTouches[0].clientX - this.circleWidth / 2; //减去this.circleWidth / 2目的是让手指按在悬浮球正中
       let offsetY = e.targetTouches[0].clientY - this.circleHeight / 2; //减去this.circleHeight / 2目的是让手指按在悬浮球正中
       if (offsetX <= 0 + this.placeholderWidth) {
-        offsetX = 0 + this.placeholderWidth;
+        offsetX = 0 + this.placeholderWidth; //不让悬浮球完全贴边
       } else if (
         offsetX >=
         document.documentElement.clientWidth -
