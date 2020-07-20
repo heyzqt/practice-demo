@@ -8,6 +8,7 @@
       }"
       ref="circle"
     >
+    
       <div class="content" v-if="showCircleContent">
         <div
           class="status"
@@ -157,7 +158,7 @@ export default {
     },
     //限制悬浮球一个范围内滑动
     handleTouchMove(e) {
-      this.isAnimated = false;
+      this.isAnimated = false; //手指拖动小球滑动的时候不需要动画，滑动停止的时候添加动画
       this.$refs.circle.style.borderRadius = "50%";
       let offsetX = e.targetTouches[0].clientX - this.circleWidth / 2; //减去this.circleWidth / 2目的是让手指按在悬浮球正中
       let offsetY = e.targetTouches[0].clientY - this.circleHeight / 2; //减去this.circleHeight / 2目的是让手指按在悬浮球正中
@@ -193,7 +194,7 @@ export default {
     },
     //touchend的时候，悬浮球吸边显示
     handleTouchEnd(e) {
-      this.isAnimated = true;
+      this.isAnimated = true; //手指拖动小球滑动的时候不需要动画，滑动停止的时候添加动画
       let circleCenterX =
         parseInt(this.$refs.circle.style.left.replace("px", "")) +
         this.circleWidth / 2; //悬浮球中心的x坐标
